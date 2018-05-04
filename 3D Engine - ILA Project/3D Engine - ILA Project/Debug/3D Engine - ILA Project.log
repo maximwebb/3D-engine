@@ -1,9 +1,10 @@
 ﻿  3D Engine - ILA Project.cpp
-c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(48): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(50): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(72): warning C4018: '<': signed/unsigned mismatch
-c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(84): warning C4018: '<': signed/unsigned mismatch
-c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(124): warning C4018: '<': signed/unsigned mismatch
-c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(164): warning C4305: 'initializing': truncation from 'double' to 'float'
-c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(324): warning C4101: 'rcClient': unreferenced local variable
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(26): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(113): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(115): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(137): warning C4018: '<': signed/unsigned mismatch
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(147): warning C4018: '<': signed/unsigned mismatch
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(187): warning C4018: '<': signed/unsigned mismatch
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(235): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(395): warning C4101: 'rcClient': unreferenced local variable
   3D Engine - ILA Project.vcxproj -> C:\Maxim\ILA\3D-engine\3D Engine - ILA Project\Debug\3D Engine - ILA Project.exe
