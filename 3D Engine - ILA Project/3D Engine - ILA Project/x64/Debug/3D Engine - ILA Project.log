@@ -1,0 +1,15 @@
+﻿  3D Engine - ILA Project.cpp
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(29): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(121): warning C4244: '+=': conversion from 'float' to 'int', possible loss of data
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(151): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(179): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(181): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(320): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(448): warning C4244: 'initializing': conversion from 'UINT_PTR' to 'int', possible loss of data
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(539): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(540): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(566): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(567): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(568): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\maxim\ila\3d-engine\3d engine - ila project\3d engine - ila project\3d engine - ila project.cpp(480): warning C4101: 'rcClient': unreferenced local variable
+  3D Engine - ILA Project.vcxproj -> C:\Maxim\ILA\3D-engine\3D Engine - ILA Project\x64\Debug\3D Engine - ILA Project.exe
