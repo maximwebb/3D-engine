@@ -4,6 +4,8 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{minted}
 \graphicspath{ {images/} }
 
 \title{
@@ -23,20 +25,23 @@ In this report, I will describe the process of building a 3D physics engine, wit
 \newline
 \newline
 However, this is not the sole goal; the aim throughout the project is to build a physics engine from first principles, without relying on pre-existing 3D graphical APIs such as OpenGL, or Direct3D. Therefore, the report will also describe the mathematics behind the rendering process, as well as the necessary methods for representing 3D transformations.
-
 \newline
 
 \section{Technology}
-This project will be developed using C++, for both its speed, and for its object orientated paradigm, which will prove useful for the structure of the project.
+The program will be written in C++, for its speed, and for its object orientation, which will prove useful for the structure of the project.
 \newline
 \newline
-Windows GDI will provide basic graphical output, which is limited to drawing lines and polygons. 
+Windows GDI will be used for basic graphical output, which is limited to drawing lines and polygons. 
 \newline
 \newline
-Git will be used for this project, and provides versatile and powerful VCS. The project's code is available at 
-\href{https://github.com/maximwebb/3D-engine}{here}
+Git will be used for this project, providing versatile and powerful VCS. The project's code is available 
+\href{https://github.com/maximwebb/3D-engine}{\color{blue} on Github}\color{black}.
 \newline
 \newline
+
+\newpage
+
+\section{Basic Structure}
 
 
 
