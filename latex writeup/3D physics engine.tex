@@ -5,8 +5,26 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{xcolor}
-\usepackage{minted}
+\usepackage{listings}
 \graphicspath{ {images/} }
+
+\lstset{frame=tb,
+	language=C++,
+  	aboveskip=3mm,
+  	belowskip=3mm,
+  	showstringspaces=false,
+  	columns=flexible,
+  	basicstyle={\small\ttfamily},
+  	numbers=none,
+  	numberstyle=\tiny\color{gray},
+  	keywordstyle=\color{blue},
+  	commentstyle=\color{brown},
+  	stringstyle=\color{mauve},
+  	breaklines=true,
+  	breakatwhitespace=true,
+  	tabsize=3
+}
+
 
 \title{
 	\Huge
@@ -43,7 +61,22 @@ Git will be used for this project, providing versatile and powerful VCS. The pro
 
 \section{Basic Structure}
 
-
-
+First off, we create a Point class, with the parameter absPos describing the absolute position in the universe. Also included are the two methods "update" and "draw" -  update will project the point's absolute position to a position on the viewport,
+\newline
+\begin{lstlisting}
+class Point {
+public:
+	/* x, y, z coordinates */
+	vector<float> absPos;
+	
+	void update() {
+	
+	}
+	
+	void draw() {
+	
+	}
+}
+\end{lstlisting}
 
 \end{document}

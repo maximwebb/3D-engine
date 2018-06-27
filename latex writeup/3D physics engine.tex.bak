@@ -4,7 +4,27 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
 \graphicspath{ {images/} }
+
+\lstset{frame=tb,
+	language=C++,
+  	aboveskip=3mm,
+  	belowskip=3mm,
+  	showstringspaces=false,
+  	columns=flexible,
+  	basicstyle={\small\ttfamily},
+  	numbers=none,
+  	numberstyle=\tiny\color{gray},
+  	keywordstyle=\color{blue},
+  	commentstyle=\color{brown},
+  	stringstyle=\color{mauve},
+  	breaklines=true,
+  	breakatwhitespace=true,
+  	tabsize=3
+}
+
 
 \title{
 	\Huge
@@ -23,22 +43,45 @@ In this report, I will describe the process of building a 3D physics engine, wit
 \newline
 \newline
 However, this is not the sole goal; the aim throughout the project is to build a physics engine from first principles, without relying on pre-existing 3D graphical APIs such as OpenGL, or Direct3D. Therefore, the report will also describe the mathematics behind the rendering process, as well as the necessary methods for representing 3D transformations.
-
 \newline
 
 \section{Technology}
-This project will be developed using C++, for both its speed, and for its object orientated paradigm, which will prove useful for the structure of the project.
+The program will be written in C++, for its speed, and for its object orientation, which will prove useful for the structure of the project.
 \newline
 \newline
-Windows GDI will provide basic graphical output, which is limited to drawing lines and polygons. 
+Windows GDI will be used for basic graphical output, which is limited to drawing lines and polygons. 
 \newline
 \newline
-Git will be used for this project, and provides versatile and powerful VCS. The project's code is available at 
-\href{https://github.com/maximwebb/3D-engine}{here}
+Git will be used for this project, providing versatile and powerful VCS. The project's code is available 
+\href{https://github.com/maximwebb/3D-engine}{\color{blue} on Github}\color{black}.
 \newline
 \newline
 
+\newpage
 
+\section{Basic Structure}
 
+First off, we create a Point class, with the parameter absPos describing the absolute position in the universe. Also included are the two methods "update" and "update" will project the point's absolute position to a position on the viewport.
+\newline
+\begin{lstlisting}
+class Point {
+public:
+	/* x, y, z coordinates */
+	vector<float> absPos;
+	
+	void update() {
+	
+	}
+	
+	void draw() {
+	
+	}
+}
+
+if (var == 1):
+	//foo
+else:
+	
+\end{lstlisting}
 
 \end{document}
