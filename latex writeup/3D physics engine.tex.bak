@@ -39,12 +39,17 @@
 
 \newpage
 
-\section{Abstract}
+\begin{abstract}
 In this report, I will describe the process of building a 3-D physics engine, with the end goal being to create an accurate model for projectile motion.
 \newline
 \newline
 However, this is not the sole goal; the aim throughout the project is to build a physics engine from first principles, without relying on pre-existing 3-D graphical APIs such as OpenGL, or Direct3D. Therefore, the report will also describe the mathematics behind the rendering process, as well as the necessary methods for representing 3-D transformations.
 \newline
+\end{abstract}
+\newpage
+\tableofcontents
+
+\newpage
 
 \section{Technology}
 The program will be written in C++, for its speed, and for its object orientation, which will prove useful for the structure of the project. This includes the use of several template classes from the STL, such as \verb|<cmath>| and \verb|<vector>|.
@@ -55,14 +60,11 @@ Windows GDI will be used for basic graphical output, which is limited to drawing
 \newline
 Git will be used for this project, providing versatile and powerful VCS. The project's source code is available 
 \href{https://github.com/maximwebb/3D-engine}{\color{blue} on Github}\color{black}.
-\newline
-\newline
 
 \newpage
-
 \section{Basic Structure}
 
-First, the Point class will be the building blocks of engine, with the parameter absPos describing the absolute position in the universe. The declared methods "update" and "draw" will be fleshed out later.
+First, the Point class will be the building blocks of engine, with the parameter \verb|abs_pos| describing the absolute position in the universe. The declared methods \verb|update()| and \verb|draw()| will be fleshed out later.
 \begin{lstlisting}
 class Point {
 public:
@@ -153,7 +155,7 @@ Then, the width of the virtual plane, and the ratio of this width to the point's
 \newline
 \newline
 Let p = plane width, let x, z be coordinates of point:
-$$ w = ztan{\theta} $$
+$$ p = ztan{\theta} $$
 $$ ratio = \frac{x}{ztan{\theta}} $$
 Applying the same logic, the vertical ratio is $ \frac{y}{ztan{\theta}} $
 \newline
@@ -163,7 +165,7 @@ Then, if the screen has width w and height h, the coordinates on the window $(s_
 $$ s_x = \frac{1}{2}w + \frac{xw}{ztan{\theta}} $$
 $$ s_y = \frac{1}{2}h + \frac{yh}{ztan{\theta}} $$
 \newpage
-It is worth noting at this point that this method only works if the viewer is centred about (0, 0, 0). Therefore, in our Point class definition, there should be a second position coordinate, relative to the viewer. With this new type of coordinate, the "update()" method can now be defined:
+It is worth noting at this point that this method only works if the viewer is centred about (0, 0, 0). Therefore, in the Point class definition, there should be a second position coordinate, relative to the viewer. With this new type of coordinate, \verb|update()| can now be defined as shown:
 
 \begin{lstlisting}
 class Point {
@@ -188,4 +190,13 @@ public:
 
 \end{lstlisting}
 For clarity's sake, some of the variables have been renamed in the code, but the function is the same as the previous result.
+
+\newpage
+
+\section{Transformations of 3-D space}
+Now that projections onto the viewport has been implemented, there needs to be a way of the viewer moving around the universe. This requires translating and rotating the universe about the viewer.
+\newline
+\newline
+There are several methods for handling these transformations - one approach would be the use of quaternions, which are an extension of complex numbers, consisting of four separate parts to handle rotations. However, 
+
 \end{document}
