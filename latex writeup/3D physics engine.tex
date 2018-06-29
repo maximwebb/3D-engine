@@ -140,9 +140,31 @@ public:
 }
 \end{lstlisting}
 
-There will also be a Player class created later, in order to store information about the viewer, such as the angle and the velocity. 
 \newpage
 
+The \verb|PLAYER| class will store global information about the viewer, including the viewer's position, velocity, field of view, and various other properties:
+
+\begin{lstlisting}
+class PLAYER {
+public:
+
+	/*Stores player's absolute universal coordinates from origin.*/
+	vector<int> coords = { 0, 0, 0 };
+
+	float fov = 120;	
+	
+	int xVel;
+	int yVel;
+	int zVel;
+
+};
+
+PLAYER Player;
+\end{lstlisting}
+
+These four classes make up the fundamental structure of the program, and they will all be added to shortly.
+
+\newpage
 \section{Projecting onto the viewport}
 When considering displaying objects on the viewport (the visible section of the screen), it becomes evident that a method is required for converting between the 3-D coordinates of the universe, and the 2-D coordinates of the viewport. This process must account for depth, thereby providing perspective.
 
@@ -197,6 +219,146 @@ For clarity's sake, some of the variables have been renamed in the code, but the
 Now that projections onto the viewport has been implemented, there needs to be a way of the viewer moving around the universe. This requires translating and rotating the universe about the viewer.
 \newline
 \newline
-There are several methods for handling these transformations - one approach would be the use of quaternions, which are an extension of complex numbers, 
+There are several methods for handling these transformations - one approach would be the use of quaternions, which are an extension of complex numbers, consisting of four separate parts to handle rotations. For this project, however, matrices will handle all transformations, predominantly for their versatility and speed for manipulating vector space.
+\newline
+\newline
+The first problem to tackle is creating a matrix data type - C++ does not natively support matrices, so they will need to be built in manually. By using a typedef to define a \verb|matrix| data type as a nested array of floats:
+
+\begin{lstlisting}
+using matrix = vector<vector<float>>;
+\end{lstlisting}
+
+A function can be created that will taken an array of 16 numbers and return a 4x4 matrix:
+\begin{lstlisting}
+matrix Mat(vector<float> arr) {
+	matrix mat;
+
+	for (int row = 0; row < 4; row++) {
+		mat.push_back({});
+		for (int col = 0; col < 4; col++) {
+			mat[row].push_back(arr[row * 4 + col]);
+		}
+	}
+	return mat;
+}
+\end{lstlisting}
+
+While this approach may seem more convoluted than simply defining a matrix class, it allows for direct interaction with the elements inside the matrix, and is more lightweight than a class or struct.
+\newline
+\newline
+Next, by defining matrix multiplication, it is possible to chain transformations and apply transformations to vectors. Here, the \verb|multiply()| function is overloaded so that multiplication between two matrices and multiplication between a matrix and a vector is separate. While this could be combined into a single function, it would require conversion of position vectors (currently 1-D arrays) into matrices (2-D arrays) each cycle, a computationally expensive process.
+
+\begin{lstlisting}
+
+/* Multiplies two matrices and returns the resulting matrix */
+matrix multiply(matrix mat1, matrix mat2) {
+	matrix mat3;
+	for (int row = 0; row < 4; row++) {
+		mat3.push_back({});
+		for (int num = 0; num < 4; num++) {
+			mat3[row].push_back(0);
+			for (int col = 0; col < 4; col++) {
+				mat3[row][num] += (mat1[row][col] * mat2[col][num]);
+			}
+		}
+	}
+
+	return mat3;
+}
+
+/* Multiplies a vector by a matrix and returns the resulting vector */
+vector<int> multiply(matrix transform_mat, vector<int> pt) {
+	vector<int> pt2;
+	for (int row = 0; row < 4; row++) {
+		pt2.push_back(0);
+		for (int col = 0; col < 4; col++) {
+			pt2[row] += (pt[col] * transform_mat[row][col]);
+		}
+	}
+
+	return pt2;
+}
+\end{lstlisting}
+\newpage
+
+You may have noticed that all of the vectors and matrices defined thus far have been four dimensional, whereas the universe has only three spatial dimensions. The reasoning behind this is that whilst 3 x 3 matrices can be used to represent linear transformations, they cannot represent a translation, without defining an addition function.
+\newline
+\newline
+Instead, by using four rows and columns, the (x, y, z) offset can be represented in the fourth column as shown:
+
+$$
+M = 
+\begin{pmatrix}
+	1 & 0 & 0 & x \\
+	0 & 1 & 0 & y \\
+	0 & 0 & 1 & z \\
+	0 & 0 & 0 & 1
+	
+\end {pmatrix}
+$$
+
+By storing the (x, y, z) offset as such, translations are kept separate of rotations, simplifying the process greatly. Translations are now defined by adding the player velocity vector to these entries in the matrix.
+\newline
+\newline
+The rotation matrices can now be defined. For rotations about the y-axis:
+
+$$ R_y = 
+	\begin{pmatrix}
+		\cos{\theta} & 0 & \sin{\theta} & 0 \\
+		0 & 1 & 0 & 0 \\
+		-\sin{\theta} & 0 & \cos{\theta} & 0 \\
+		0 & 0 & 0 & 1
+	\end{pmatrix}
+$$
+The matrix for rotations about the x-axis:
+$$ R_x = 
+	\begin{pmatrix}
+		0 & 0 & 1 & 0 \\
+		0 & \cos{\theta} & -\sin{\theta} & 0 \\
+		0 & \sin{\theta} & \cos{\theta} & 0 \\
+		0 & 0 & 0 & 1
+	\end{pmatrix}
+$$
+And for the sake of completeness, rotations about the z-axis (this one will not be used, as it does not result in a particularly useful transformation).
+$$
+R_z = 
+	\begin{pmatrix}
+		\cos{\theta} & -\sin{\theta} & 0 & 0 \\
+		\sin{\theta} & cos{\theta} & 0 & 0 \\
+		0 & 0 & 1 & 0 \\
+		0 & 0 & 0 & 1
+	\end{pmatrix}
+$$
+
+\newpage
+The \verb|pos| property for the Player class will be the matrix describing the current linear transformation of vector space: 
+
+\begin{lstlisting}
+class PLAYER {
+public:
+
+	/*Stores player's absolute universal coordinates from origin.*/
+	vector<int> coords = { 0, 0, 0 };
+
+	float fov = 120;	
+	
+	int xVel;
+	int yVel;
+	int zVel;
+	
+	matrix pos = Mat({ {1, 0, 0, 0,
+					0, 1, 0, 0,
+					0, 0, 1, 0,
+					0, 0, 0, 1} });
+
+};
+\end{lstlisting}
+
+These are all the necessary methods required to transform 3-D space, allowing the viewer to move and look around freely. In the next section, the necessary methods for updating and drawing the universe.
+\newpage
+
+\section{Updating and Drawing the Event Loop}
+
+
 
 \end{document}
