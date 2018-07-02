@@ -20,7 +20,7 @@
   	numberstyle=\tiny\color{gray},
   	keywordstyle=\color{blue},
   	commentstyle=\color{brown},
-  	stringstyle=\color{mauve},
+  	stringstyle=\color{red},
   	breaklines=true,
   	breakatwhitespace=true,
   	tabsize=4
@@ -40,7 +40,7 @@
 \newpage
 
 \begin{abstract}
-In this report, I will describe the process of building a 3-D physics engine, with the end goal being to create an accurate model for projectile motion.
+This report will describe the process of building a 3-D physics engine, with the end goal being to create an accurate model for projectile motion.
 \newline
 \newline
 However, this is not the sole goal; the aim throughout the project is to build a physics engine from first principles, without relying on pre-existing 3-D graphical APIs such as OpenGL, or Direct3D. Therefore, the report will also describe the mathematics behind the rendering process, as well as the necessary methods for representing 3-D transformations.
@@ -64,7 +64,7 @@ Git will be used for this project, providing versatile and powerful VCS. The pro
 \newpage
 \section{Basic Structure}
 
-First, the Point class will be the building blocks of engine, with the parameter \verb|abs_pos| describing the absolute position in the universe. The declared methods \verb|update()| and \verb|draw()| will be fleshed out later.
+First, the Point class will be the building blocks of engine, with the parameter \verb|abs_pos| describing the absolute position in the universe. The method \verb|update()| will be fleshed out later.
 \begin{lstlisting}
 class Point {
 public:
@@ -74,14 +74,11 @@ public:
 	void update() {
 	
 	}
-	
-	void draw(HDC hdc) {
-	
-	}
+
 }
 \end{lstlisting}
 
-Next, the Plane class stores an array of points, and contains a method for updating them, as well as a method for drawing the plane itself. 
+Next, the Plane class stores an array of points, and contains a method for updating them iteratively. 
 \begin{lstlisting}
 class Plane {
 public:
@@ -94,9 +91,6 @@ public:
 		}
 	}
 	
-	void fill_plane(HDC hdc) {
-	
-	}
 }
 \end{lstlisting}
 \newpage
@@ -133,8 +127,7 @@ public:
 	
 	void update_faces(HDC hdc) {
 		for (int f = 0; f < faces.size(); f++) {
-			faces[f].update_points(hdc);
-			faces[f].fill_plane(hdc);
+			faces[f].update_points();
 		}
 	}
 }
@@ -148,7 +141,7 @@ The \verb|PLAYER| class will store global information about the viewer, includin
 class PLAYER {
 public:
 
-	/*Stores player's absolute universal coordinates from origin.*/
+	/* Stores player's absolute universal coordinates from origin. */
 	vector<int> coords = { 0, 0, 0 };
 
 	float fov = 120;	
@@ -354,11 +347,147 @@ public:
 };
 \end{lstlisting}
 
-These are all the necessary methods required to transform 3-D space, allowing the viewer to move and look around freely. In the next section, the necessary methods for updating and drawing the universe.
+These are all the necessary methods required to transform 3-D space, allowing the viewer to move and look around freely. In the next section, the necessary methods for updating and drawing the universe are detailed.
 \newpage
 
-\section{Updating and Drawing the Event Loop}
+\section{Updating and Drawing in the Event Loop}
 
+Now that all of the fundamental groundwork is in place, there needs to be a graphical output. This is done by adding the following code to the plane class, meaning the quadrilateral defined by the plane's vertices will be filled in:
 
+\begin{lstlisting}
 
+class Plane {
+public:
+	/* Parameters */
+	vector<Point> points;
+	
+	/* Other */
+	POINT arr[4];
+	
+	void update_points() {
+		for (int p = 0; p < points.size(); p++) {
+			points[p].update();
+			
+			arr[i].x = points[i].screen_x;
+			arr[i].y = points[i].screen_y;
+		}
+	}
+	
+	void fill_plane(HDC hdc) {	
+		SelectObject(hdc, GetStockObject(DC_BRUSH));
+		SetDCBrushColor(hdc, RGB(200, 35, 16));
+		Polygon(hdc, points, 4);
+	}
+	
+}
+\end{lstlisting}
+
+Note: \verb|arr| is a C-style array, used because the \verb|Polygon()| method requires a static array. Some code has been excluded from this section, but it is predominantly used for configuring Windows GDI, and is not relevant to the project.
+\newpage
+Adding \verb|fill_plane()| to the Obloid class's update loop, and defining a new Obloid, means that objects can now be drawn:
+
+\includegraphics[width=1\textwidth]{first_cube.png}
+
+Success! Next, in order to move and look around in the universe, an event loop is required. This will continuously update and draw all the objects in the universe:
+
+\begin{lstlisting}
+
+void clear(HDC hdc, RECT* prc) {
+	HBRUSH brush_white = CreateSolidBrush(RGB(255, 255, 255));
+	FillRect(hdc, prc, brush_white);
+	DeleteObject(brush_white);
+}
+
+int timer = SetTimer(hWnd, MYTIMER, 5, NULL);
+
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	//Above code hidden
+	
+	case WM_TIMER:
+	{
+	
+		/* Checks for keyboard input & adjusts velocity */
+		if (GetAsyncKeyState('A') < 0) {
+			player.xVel = -5;
+		}
+		else if (GetAsyncKeyState('D') < 0) {
+			player.xVel = 5;
+		}
+		
+		else {
+			player.xVel = 0;
+		}
+
+		if (GetAsyncKeyState('W') < 0) {
+			player.zVel = 5;
+		}
+		else if (GetAsyncKeyState('S') < 0) {
+			player.zVel = -5;
+		}
+		else {
+			player.zVel = 0;
+		}
+
+		if (GetAsyncKeyState(0x20) < 0) {
+			player.yVel = 5;
+		}
+		else if (GetAsyncKeyState(0xA0) < 0) {
+			player.yVel = -5;
+		}
+		else {
+			player.yVel = 0;
+		}
+		
+		/* Updates viewer pos matrix */
+		player.pos[0][3] += player.xVel;
+		player.pos[1][3] += player.yVel;
+		player.pos[2][3] += player.zVel;
+		
+		clear(hdc, &window_rect);
+		cube_1.update_faces(hdc);
+		
+\end{lstlisting}
+Then, adding the rotation matrices from the previous section, the viewer can now freely look around the universe:
+
+\begin{lstlisting}
+	/* Keyboard input for rotations */
+	if (GetAsyncKeyState(0x25) < 0) {
+		player.xAng = player.angVel;
+		player.masterAng += player.angVel;
+	}
+	else if (GetAsyncKeyState(0x27) < 0) {
+		player.xAng = -player.angVel;
+		player.masterAng -= player.angVel;
+	}
+
+	else {
+		player.xAng = 0;
+	}
+	if (GetAsyncKeyState(0x26) < 0) {
+		player.yAng = player.angVel;
+	}
+	else if (GetAsyncKeyState(0x28) < 0) {
+		player.yAng = -player.angVel;
+	}
+
+	else {
+		player.yAng = 0;
+	}
+
+	matrix rotXMat = Mat({ { cos(player.xAng), 0, sin(player.xAng), 0,
+		0, 1, 0, 0,
+		-sin(player.xAng), 0, cos(player.xAng), 0,
+		0, 0, 0, 1
+		} });
+
+	matrix rotYMat = Mat({ { 1, 0, 0, 0,
+		0, cos(player.yAng), sin(player.yAng), 0,
+		0, -sin(player.yAng), cos(player.xAng), 0,
+		0, 0, 0, 1
+		} });
+
+	player.pos = multiply(rotXMat, player.pos);
+	player.pos = multiply(rotYMat, player.pos);
+\end{lstlisting}
 \end{document}
