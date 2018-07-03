@@ -277,7 +277,7 @@ vector<int> multiply(matrix transform_mat, vector<int> pt) {
 You may have noticed that all of the vectors and matrices defined thus far have been four dimensional, whereas the universe has only three spatial dimensions. The reasoning behind this is that whilst 3 x 3 matrices can be used to represent linear transformations, they cannot represent a translation, without defining an addition function.
 \newline
 \newline
-Instead, by using four rows and columns, the (x, y, z) offset can be represented in the fourth column as shown:
+Instead, by using four rows and columns, the (x, y, z) offset can be represented in the fourth column of the matrix as shown:
 
 $$
 M = 
@@ -494,4 +494,38 @@ Example of a working rotation:
 \newline
 \includegraphics[width=0.7\textwidth]{rotated_cube.png}
 
+\section{Adding physics to the universe}
+This section of the report details the process of creating physical phenomena in the universe, such as gravity, air resistance and friction. Before adding any of these accelerative processes, points must be linked to the obloids they belong to in such a way that they can read various properties of obloids, such as the mass and velocity.
+\newline
+\newline
+
+\begin{lstlisting}
+	int mass = 5;
+	bool on_floor = false;
+\end{lstlisting}
+This will be achieved through the use of pointers: a reference to a memory address storing the relevant information. Each point will be assigned a "parent obloid" by reference, although this must be done by means of an Obloid function that assigns these references at runtime (the process cannot be done beforehand).
+
+\begin{lstlisting}
+
+/* Inside Obloid class definition */
+void initialise_planes() {
+	for (int m = 0; m < faces.size(); m++) {
+		for (int n = 0; n < faces[m].points.size(); n++) {
+			faces[m].points[m].parent_obloid = this;
+			faces[m].points[m].assign_properties();
+		}
+	}
+}
+
+/* Declared in point class definition, but defined outside */
+void Point::assign_properties() {
+	mass = parent_obloid->mass;
+	on_floor = &parent_obloid->on_floor;
+	xVel = &parent_obloid->velocity[0];
+	yVel = &parent_obloid->velocity[1];
+	zVel = &parent_obloid->velocity[2];
+}
+\end{lstlisting}
+
+\subsection{Gravity}
 \end{document}
