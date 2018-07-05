@@ -332,12 +332,10 @@ public:
 
 	/*Stores player's absolute universal coordinates from origin.*/
 	vector<int> coords = { 0, 0, 0 };
+	vector<int> vel = { 0, 0, 0 };
+
 
 	float fov = 120;	
-	
-	int xVel;
-	int yVel;
-	int zVel;
 	
 	matrix pos = Mat({ {1, 0, 0, 0,
 					0, 1, 0, 0,
@@ -386,7 +384,9 @@ Note: \verb|arr| is a C-style array, used because the \verb|Polygon()| method re
 \newpage
 Adding \verb|fill_plane()| to the Obloid class's update loop, and defining a new Obloid, means that objects can now be drawn:
 
-\includegraphics[width=1\textwidth]{first_cube.png}
+\begin{center}
+\includegraphics[width=0.5\textwidth]{first_cube.png}
+\end{center}
 
 Success! Next, in order to move and look around in the universe, an event loop is required. This will continuously update and draw all the objects in the universe:
 
@@ -409,40 +409,40 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	
 		/* Checks for keyboard input & adjusts velocity */
 		if (GetAsyncKeyState('A') < 0) {
-			player.xVel = -5;
+			player.vel[0] = -5;
 		}
 		else if (GetAsyncKeyState('D') < 0) {
-			player.xVel = 5;
+			player.vel[0] = 5;
 		}
 		
 		else {
-			player.xVel = 0;
+			player.vel[0] = 0;
 		}
 
 		if (GetAsyncKeyState('W') < 0) {
-			player.zVel = 5;
+			player.vel[2] = 5;
 		}
 		else if (GetAsyncKeyState('S') < 0) {
-			player.zVel = -5;
+			player.vel[2] = -5;
 		}
 		else {
-			player.zVel = 0;
+			player.vel[2] = 0;
 		}
 
 		if (GetAsyncKeyState(0x20) < 0) {
-			player.yVel = 5;
+			player.vel[1] = 5;
 		}
 		else if (GetAsyncKeyState(0xA0) < 0) {
-			player.yVel = -5;
+			player.vel[1] = -5;
 		}
 		else {
-			player.yVel = 0;
+			player.vel[1] = 0;
 		}
 		
 		/* Updates viewer pos matrix */
-		player.pos[0][3] += player.xVel;
-		player.pos[1][3] += player.yVel;
-		player.pos[2][3] += player.zVel;
+		player.pos[0][3] += player.vel[0];
+		player.pos[1][3] += player.vel[1];
+		player.pos[2][3] += player.vel[2];
 		
 		clear(hdc, &window_rect);
 		cube_1.update_faces(hdc);
@@ -453,22 +453,20 @@ Then, adding the rotation matrices from the previous section, the viewer can now
 \begin{lstlisting}
 	/* Keyboard input for rotations */
 	if (GetAsyncKeyState(0x25) < 0) {
-		player.xAng = player.angVel;
-		player.masterAng += player.angVel;
+		player.xAng = 0.025;
 	}
 	else if (GetAsyncKeyState(0x27) < 0) {
-		player.xAng = -player.angVel;
-		player.masterAng -= player.angVel;
+		player.xAng = -0.025;
 	}
 
 	else {
 		player.xAng = 0;
 	}
 	if (GetAsyncKeyState(0x26) < 0) {
-		player.yAng = player.angVel;
+		player.yAng = 0.025;
 	}
 	else if (GetAsyncKeyState(0x28) < 0) {
-		player.yAng = -player.angVel;
+		player.yAng = -0.025;
 	}
 
 	else {
@@ -492,18 +490,18 @@ Then, adding the rotation matrices from the previous section, the viewer can now
 \end{lstlisting}
 Example of a working rotation:
 \newline
-\includegraphics[width=0.7\textwidth]{rotated_cube.png}
-
+\begin{center}
+\includegraphics[width=0.8\textwidth]{rotated_cube.png}
+\end{center}
 \section{Adding physics to the universe}
-This section of the report details the process of creating physical phenomena in the universe, such as gravity, air resistance and friction. Before adding any of these accelerative processes, points must be linked to the obloids they belong to in such a way that they can read various properties of obloids, namely the velocity, as well as
-\newline
-\newline
+This section of the report details the process of creating physical phenomena in the universe, such as gravity, air resistance and friction. Before adding any of these accelerative processes, points must be linked to the obloids they belong to in such a way that they can read various properties of obloids, namely the velocity, the mass, and whether the object is on the ground or not.
 
 \begin{lstlisting}
+	vector<int> velocity = {0, 0, 0};
 	int mass = 5;
 	bool on_floor = false;
 \end{lstlisting}
-This will be achieved through the use of pointers: a reference to a memory address storing the relevant information. Each point will be assigned a "parent obloid" by reference, although this must be done by means of an Obloid function that assigns these references at runtime (the process cannot be done beforehand).
+This will be achieved through the use of pointers: a reference to a memory address storing the relevant information. Each point will be assigned a "parent obloid" by reference, although this must be done by means of a function that assigns these references at runtime (the process cannot be done beforehand).
 
 \begin{lstlisting}
 
@@ -526,6 +524,31 @@ void Point::assign_properties() {
 	zVel = &parent_obloid->velocity[2];
 }
 \end{lstlisting}
+Now, after running \verb|point.assign_properties()| for every point, the velocity of an obloid is linked to the velocity of the points that make up the obloid, and can be used to update the position of the point.
+\newline
+\newline
+\newline
+\begin{lstlisting}
+void update() {
+	/* Safeguards against null pointer */
+	if (xVel) {
+		abs_pos[0] += *xVel;
+		abs_pos[2] += *zVel;
 
+		if (on_floor) {
+			abs_pos[1] += *yVel;
+		}
+	}
+
+	screen_x = window_width * 0.5 + window_width * rel_pos[0] / (rel_pos[2] * tan(fov));
+
+	screen_y = window_height * 0.5 + window_width * rel_pos[1] / (rel_pos[2] * tan(fov));	
+
+}
+\end{lstlisting}
 \subsection{Gravity}
+The strength of gravity in the universe will be set by a constant global variable, and will be added to all obloids that are not on the ground every event loop. Because the loop runs every 5 milliseconds, the gravitational constant will be different to 9.81.
+\newline
+\newline
+
 \end{document}
