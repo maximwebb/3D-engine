@@ -547,5 +547,57 @@ void update() {
 }
 \end{lstlisting}
 \subsection{Gravity}
-The strength of gravity in the universe will be set as a constant global variable, and will be added to all obloids that are not on the ground every event loop. Because the loop runs every 5 milliseconds, the gravitational constant will be different to 9.81.
+The strength of gravity in the universe will be set by a constant global variable, and will be added to all obloids that are not on the ground every event loop. Because the loop runs every 5 milliseconds, the gravitational constant will be different to 9.81, as it is on Earth. 
+\newline
+\newline
+The actual values used here are not of great significance, as the aim is to produce accurate projectile motion mechanics, and not necessarily to replicate projectile motion on Earth.
+
+\begin{lstlisting}
+
+const float GRAVITY = 0.4;
+/* Dictates the minimum global y value ie. ground level */
+const int FLOOR_Y = 100;
+
+\end{lstlisting}
+
+The gravitational acceleration will be implemented by adding \verb|GRAVITY| to each obloid's y velocity (taking y positive as down). There will also be a check to ensure that the obloid has not exceeded \verb|FLOOR_Y|.
+\newpage
+\begin{lstlisting}
+void update_faces(HDC hdc) {
+	
+	if (on_floor) {
+		bounces++;
+		//velocity[1] = 0;
+		velocity[1] = -10 * pow(restitution, bounces);
+		if (abs(velocity[1]) < 2) {
+			velocity[1] = 0;
+		}
+		else {
+			on_floor = false;
+		}
+
+		/* Applies friction */
+		if (abs(velocity[0]) < 0.2) {
+			velocity[0] = 0;
+		}
+		else {
+			velocity[0] -= sgn(velocity[0]) * mass * friction;
+		}
+		if (abs(velocity[2]) < 0.2) {
+			velocity[2] = 0;
+		}
+		else {
+			velocity[2] -= sgn(velocity[2]) * mass * friction;
+		}
+	}
+	else if (mass && !on_floor) {
+		velocity[1] += GRAVITY;
+	}
+			
+	for (int f = 0; f < faces.size(); f++) {
+		faces[f].update_points();
+		faces[f].fill_plane(hdc);
+	}
+}
+\end{lstlisting}
 \end{document}
