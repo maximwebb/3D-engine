@@ -143,12 +143,9 @@ public:
 
 	/* Stores player's absolute universal coordinates from origin. */
 	vector<int> coords = { 0, 0, 0 };
+	vector<int> vel = { 0, 0, 0 };
 
 	float fov = 120;	
-	
-	int xVel;
-	int yVel;
-	int zVel;
 
 };
 
@@ -453,40 +450,40 @@ Then, adding the rotation matrices from the previous section, the viewer can now
 \begin{lstlisting}
 	/* Keyboard input for rotations */
 	if (GetAsyncKeyState(0x25) < 0) {
-		player.xAng = 0.025;
+		player.x_ang = 0.025;
 	}
 	else if (GetAsyncKeyState(0x27) < 0) {
-		player.xAng = -0.025;
+		player.x_ang = -0.025;
 	}
 
 	else {
-		player.xAng = 0;
+		player.x_ang = 0;
 	}
 	if (GetAsyncKeyState(0x26) < 0) {
-		player.yAng = 0.025;
+		player.y_ang = 0.025;
 	}
 	else if (GetAsyncKeyState(0x28) < 0) {
-		player.yAng = -0.025;
+		player.y_ang = -0.025;
 	}
 
 	else {
-		player.yAng = 0;
+		player.y_ang = 0;
 	}
 
-	matrix rotXMat = Mat({ { cos(player.xAng), 0, sin(player.xAng), 0,
+	matrix rot_x_mat = Mat({ { cos(player.x_ang), 0, sin(player.x_ang), 0,
 		0, 1, 0, 0,
-		-sin(player.xAng), 0, cos(player.xAng), 0,
+		-sin(player.x_ang), 0, cos(player.x_ang), 0,
 		0, 0, 0, 1
 		} });
 
-	matrix rotYMat = Mat({ { 1, 0, 0, 0,
-		0, cos(player.yAng), sin(player.yAng), 0,
-		0, -sin(player.yAng), cos(player.xAng), 0,
+	matrix rot_y_mat = Mat({ { 1, 0, 0, 0,
+		0, cos(player.y_ang), sin(player.y_ang), 0,
+		0, -sin(player.y_ang), cos(player.x_ang), 0,
 		0, 0, 0, 1
 		} });
 
-	player.pos = multiply(rotXMat, player.pos);
-	player.pos = multiply(rotYMat, player.pos);
+	player.pos = multiply(rot_x_mat, player.pos);
+	player.pos = multiply(rot_y_mat, player.pos);
 \end{lstlisting}
 Example of a working rotation:
 \newline
@@ -560,21 +557,26 @@ const int FLOOR_Y = 100;
 
 \end{lstlisting}
 
-The gravitational acceleration will be implemented by adding \verb|GRAVITY| to each obloid's y velocity (taking y positive as down). There will also be a check to ensure that the obloid has not exceeded \verb|FLOOR_Y|.
+The gravitational acceleration will be implemented by adding \verb|GRAVITY| to each obloid's y velocity (taking y positive as down). There will also be a check to ensure that the obloid has not exceeded \verb|FLOOR_Y| included in the \verb|Point| definition.
 \newpage
 \begin{lstlisting}
 
+/* Point method */
+void update() {
+	
+	//Above code hidden
+
+	/* Assigns value of on_floor, which can be read by parent obloid. */
+	if (on_floor && abs_pos[1] > FLOOR_Y) {
+		*on_floor = true;
+	}
+}
+
+/* Obloid method */
 void update_faces(HDC hdc) {
 	
 	if (on_floor) {
-	
-		/* These prevent the y velocity from becoming trivially small */
-		if (abs(velocity[1]) < 0.2) {
-			velocity[1] = 0;
-		}
-		else {
-			on_floor = false;
-		}
+		velocity[1] = 0;
 
 	}
 	else if (mass && !on_floor) {
@@ -586,5 +588,35 @@ void update_faces(HDC hdc) {
 		faces[f].fill_plane(hdc);
 	}
 }
+
+\end{lstlisting}
+Obloids with a non-zero mass will now accelerate downwards until they hit the ground.
+
+\subsection{Impact Mechanics}
+
+By preserving momentum when colliding with the ground, obloids can be made to bounce according to Newton's law of Restitution, $ e = \frac{u}{v} $. First, a coefficient of restitution will be included in the list of properties for obloids. This will be used to calculate the speed of rebound for each collision with the ground.
+\newpage
+\begin{lstlisting}
+
+/* Obloid definition */
+float restitution = 0.8;
+
+void update_faces(HDC hdc) {
+	
+	if (on_floor) {
+		if (abs(velocity[1] < 0.2) {	
+			velocity[1] = 0;
+
+	}
+	else if (mass && !on_floor) {
+		velocity[1] += GRAVITY;
+	}
+			
+	for (int f = 0; f < faces.size(); f++) {
+		faces[f].update_points();
+		faces[f].fill_plane(hdc);
+	}
+}
+
 \end{lstlisting}
 \end{document}
