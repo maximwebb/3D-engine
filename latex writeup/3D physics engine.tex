@@ -64,7 +64,7 @@ Git will be used for this project, providing versatile and powerful VCS. The pro
 \newpage
 \section{Basic Structure}
 
-First, the Point class will be the building blocks of engine, with the parameter \verb|abs_pos| describing the absolute position in the universe. The method \verb|update()| will be fleshed out later.
+First, the Point class will be the building blocks of the engine, with the parameter \verb|abs_pos| describing the absolute position in the universe. The method \verb|update()| will be fleshed out later.
 \begin{lstlisting}
 class Point {
 public:
@@ -209,7 +209,7 @@ For clarity's sake, some of the variables have been renamed in the code, but the
 Now that projections onto the viewport has been implemented, there needs to be a way of the viewer moving around the universe. This requires translating and rotating the universe about the viewer.
 \newline
 \newline
-There are several methods for handling these transformations - one approach would be the use of quaternions, which are an extension of complex numbers, consisting of four separate parts to handle rotations. For this project, however, matrices will handle all transformations, predominantly for their versatility and speed for manipulating vector space.
+There are several methods for handling these transformations - one approach would be the use of quaternions, which are an extension of complex numbers, consisting of four separate parts to handle rotations. For this project, however, matrices will handle all transformations, predominantly for their versatility and speed in manipulating vector space.
 \newline
 \newline
 The first problem to tackle is creating a matrix data type - C++ does not natively support matrices, so they will need to be built in manually. By using a typedef to define a \verb|matrix| data type as a nested array of floats:
@@ -218,7 +218,7 @@ The first problem to tackle is creating a matrix data type - C++ does not native
 using matrix = vector<vector<float>>;
 \end{lstlisting}
 
-A function can be created that will taken an array of 16 numbers and return a 4x4 matrix:
+A function can be created that will take an array of 16 numbers and return a 4x4 matrix:
 \begin{lstlisting}
 matrix Mat(vector<float> arr) {
 	matrix mat;
@@ -236,7 +236,7 @@ matrix Mat(vector<float> arr) {
 While this approach may seem more convoluted than simply defining a matrix class, it allows for direct interaction with the elements inside the matrix, and is more lightweight than a class or struct.
 \newline
 \newline
-Next, by defining matrix multiplication, it is possible to chain transformations and apply transformations to vectors. Here, the \verb|multiply()| function is overloaded so that multiplication between two matrices and multiplication between a matrix and a vector is separate. While this could be combined into a single function, it would require conversion of position vectors (currently 1-D arrays) into matrices (2-D arrays) each cycle, a computationally expensive process.
+Next, by defining matrix multiplication, it is possible to chain transformations and apply transformations to vectors. Here, the \verb|multiply()| function is overloaded so that multiplication between two matrices and multiplication between a matrix and a vector is separate. While this could be combined into a single function, it would require conversion of position vectors (currently 1-D arrays) into matrices (2-D arrays) each cycle, which is a computationally expensive process.
 
 \begin{lstlisting}
 
@@ -547,7 +547,7 @@ void update() {
 The strength of gravity in the universe will be set by a constant global variable, and will be added to all obloids that are not on the ground every event loop. Because the loop runs every 5 milliseconds, the gravitational constant will be different to 9.81, as it is on Earth. 
 \newline
 \newline
-The actual values used here are not of great significance, as the aim is to produce accurate projectile motion mechanics, and not necessarily to replicate projectile motion on Earth.
+The actual values used here are not of great significance, as the aim is to produce accurate dynamics of projectile motion, and not necessarily to replicate projectile motion on Earth.
 
 \begin{lstlisting}
 
@@ -592,9 +592,9 @@ void update_faces(HDC hdc) {
 \end{lstlisting}
 Obloids with a non-zero mass will now accelerate downwards until they hit the ground.
 
-\subsection{Impact Mechanics}
+\subsection{Vertical Impact Mechanics}
 
-By preserving momentum when colliding with the ground, obloids can be made to bounce according to Newton's law of Restitution, $ e = \frac{u}{v} $. First, a coefficient of restitution will be included in the list of properties for obloids. This will be used to calculate the speed of rebound for each collision with the ground.
+By preserving momentum when colliding with the ground, obloids can be made to bounce according to Newton's law of Restitution, $ e = \frac{u}{v} $. Because the impulse acts upwards, perpendicular to the ground, only the y velocity is altered in the collision. First, a coefficient of restitution will be included in the list of properties for obloids. This will be used to calculate the speed of rebound for each collision with the ground.
 \newpage
 \begin{lstlisting}
 
@@ -625,4 +625,56 @@ void update_faces(HDC hdc) {
 \end{lstlisting}
 
 By adding a test to see if the velocity falls below a certain threshold, infinite bouncing is prevented by setting the velocity to zero.
+
+\subsection{Air Resistance}
+With all three velocity components separated, adding realistic air resistance is simplified. Assuming that air resistance follows a quadratic model [1], the equations for drag force are as follows:
+
+$$ D_x = \frac{1}{2}C_d \rho {v_x}^2 A_x  $$
+$$ D_y = \frac{1}{2}C_d \rho {v_y}^2 A_y  $$
+$$ D_z = \frac{1}{2}C_d \rho {v_z}^2 A_z  $$
+
+Where $C_d$ is a coefficient (typically determined by experiemnt), $\rho$ is the density of the medium, $v_{x, y, z}$ are the x, y, z components of the velocity and $A$ is the surface area of the face experiencing the drag force. For now, air will remain at a constant density, and can be combined with the coefficient $C_d$ to create a single parameter determining how much the air resistance affects the motion of the obloid.
+\newline
+\newline
+First, all of these properties must be defined for each obloid. The drag force will be represented as an array, as will the 3 different surface areas for the obloid's faces.
+\begin{lstlisting}
+/* Obloid definition */
+int width = abs(trf.abs_pos[0] - tlf.abs_pos[0]);
+int height = abs(trf.abs_pos[1] - brf.abs_pos[1]);
+int breadth = abs(trf.abs_pos[2] - trb.abs_pos[2]);
+
+float air_resistance_const = 0.01;
+vector<int> face_areas = { width * height, 
+						  	  width * breadth, 
+						  	  height * breadth };
+vector<float> drag_force = { 0, 0, 0 };
+\end{lstlisting}
+Each event loop, the drag force will be recalculated and applied to each component of the velocity, causing decceleration in all three axes:
+
+\begin{lstlisting}
+void update_faces{HDC hdc) {
+	if (on_floor) {
+		//Code hidden
+	}
+	else if (mass && !on_floor) {
+		velocity[1] += GRAVITY;	
+	
+		for (int d = 0; d < 3; d++) {
+			drag_force[d] = pow(velocity[d], 2) * air_resistance_const * faces_areas[d];
+			if (velocity[d] < 0.2) {
+				velocity[d] = 0;
+			}
+			else {
+				velocity[d] -= drag_force[d] * mass;
+			}
+		}
+	}
+\end{lstlisting}
+Again, there is a threshold for each component of the velocity, to prevent issues with very small velocities.
+\newpage
+\begin{thebibliography}{1}
+\bibitem{airres}
+Drag Equation
+\\\texttt{https://www.grc.nasa.gov/WWW/K-12/airplane/drageq.html}
+\end{thebibliography}
 \end{document}
