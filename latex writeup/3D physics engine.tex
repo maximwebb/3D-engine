@@ -627,7 +627,7 @@ void update_faces(HDC hdc) {
 By adding a test to see if the velocity falls below a certain threshold, infinite bouncing is prevented by setting the velocity to zero.
 
 \subsection{Air Resistance}
-With all three velocity components separated, adding realistic air resistance is simplified. Assuming that air resistance follows a quadratic model [1], the equations for drag force are as follows:
+With all three velocity components separated, adding realistic air resistance is simplified. Assuming that air resistance follows a quadratic model \cite{airres}, the equations for drag force are as follows:
 
 $$ D_x = \frac{1}{2}C_d \rho {v_x}^2 A_x  $$
 $$ D_y = \frac{1}{2}C_d \rho {v_y}^2 A_y  $$
@@ -665,16 +665,99 @@ void update_faces{HDC hdc) {
 				velocity[d] = 0;
 			}
 			else {
-				velocity[d] -= drag_force[d] * mass;
+				velocity[d] -= drag_force[d] / mass;
 			}
 		}
 	}
+}
 \end{lstlisting}
 Again, there is a threshold for each component of the velocity, to prevent issues with very small velocities.
 \newpage
-\begin{thebibliography}{1}
+\subsection{Friction}
+Friction will be the final physical phenomenon included in the engine. Because there are currently no inclined planes in the engine, and no active forces in the x-z plane (ie. no forces causing positive horizontal acceleration), friction can simply be modelled as a constant deceleration of objects in contact with the ground. The deceleration will only affect x and z velocity.
+\newline
+\newline
+A coefficient of friction (typically denoted $\mu$) will be specified in each obloid's properties, and will act in the opposite direction to the x and z velocity:
+\begin{lstlisting}
+/* Obloid definition */
+float friction = 0.06;
+
+void update_faces{HDC hdc) {
+	if (on_floor) {
+	
+		/* Handles rebounds */
+		if (abs(velocity[1] < 0.2) {	
+			velocity[1] = 0;
+		}
+		else {
+			velocity[1] = -restitution * velocity[1];
+		}
+		
+		/* Applies friction */
+		if (abs(velocity[0]) < 0.2) {
+			velocity[0] = 0;
+		}
+		else {
+			velocity[0] -= sgn(velocity[0]) * friction;
+		}
+		if (abs(velocity[2]) < 0.2) {
+			velocity[2] = 0;
+		}
+		else {
+			velocity[2] -= sgn(velocity[2]) * friction;
+		}
+	}
+	else if (mass && !on_floor) {
+		//Code hidden
+	}
+}
+\end{lstlisting}
+
+With friction implemented, all of the physical mechanics required for simluating projectile motion have been added.
+
+\newpage
+\section{Conclusion and Evaluation}
+With the development of the engine complete for the purposes of this project, there are some pictures included below demonstrating the physics created in the previous section:
+\newline
+\newline
+\newline
+Rebounds with each frame shown:
+\newline
+\includegraphics[width=1\textwidth]{projectile_motion_2.png}
+\newline
+\newline
+\newline
+Rebounds with only the trace and the final position shown:
+\newline
+\includegraphics[width=1\textwidth]{projectile_motion_4.png}
+\newline
+As you can see in both of these images, the bounces become successively lower, with subsequent collisions with the ground, demonstrating that the impact mechanics are functioning correctly.
+\newline
+Furthermore, as shown by the trace in the second image, the bounces are not symmetrical, indicating the effect of air resistance. Note that the effect of air resistance has been exaggerated for visibility, and realistically would have a much lesser effect.
+\newpage
+Rebounds followed by slide:
+\newline
+\newline
+\includegraphics[width=1\textwidth]{projectile_motion_5.png}
+\newline
+As can be seen in this image, there is a lower coefficient of restitution, resulting in fewer bounces, and a longer contact with the ground at the end. While difficult to demonstrate with a static image, the cube decelerates until stopping, once it is continuously in contact with the floor. This indicates that friction is working as intended.
+\newline
+\newline
+\newline
+It is worth considering some limitations of the model. There is currently no implementation of moments, which limits the ability of the model to represent phenomena such as spin and oblique impacts. Furthermore, a more mathematically elegant solution to how forces are applied to obloids (ie. with the use of a matrix transformation) could allow for some more advanced mechanics techniques, namely improving the air resistance model such that turbulence can be accounted for. The Navier-Stokes equations 
+\cite{turb}
+could be used to implement vortices for example, allowing for even more advanced projectile motion.
+\newline
+\newline
+While there are many areas in which the engine could be further developed, the images above, as well as the program running in real-time give an accurate model of projectile motion. If you would like to see the engine running in real time, the whole project is available to download and run on \href{https://github.com/maximwebb/3D-engine}{\color{blue} on Github}\color{black}.
+
+\newpage
+\begin{thebibliography}{2}
 \bibitem{airres}
 Drag Equation
 \\\texttt{https://www.grc.nasa.gov/WWW/K-12/airplane/drageq.html}
+\bibitem{turb}
+Turbulence, J. M. McDonough
+\\\texttt{http://www.engr.uky.edu/~acfd/lctr-notes634.pdf}
 \end{thebibliography}
 \end{document}
