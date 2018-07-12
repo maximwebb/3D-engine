@@ -6,6 +6,7 @@
 \usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{listings}
+\usepackage[nosort, superscript, biblabel]{cite}
 \graphicspath{ {images/} }
 \setlength\parindent{0pt}
 
@@ -52,7 +53,7 @@ However, this is not the sole goal; the aim throughout the project is to build a
 \newpage
 
 \section{Technology}
-The program will be written in C++, for its speed, and for its object orientation, which will prove useful for the structure of the project. This includes the use of several template classes from the STL, such as \verb|<cmath>| and \verb|<vector>|.
+The program will be written in C++ \cite{cplusplus}, for its speed, and for its object orientation, which will prove useful for the structure of the project. This includes the use of several template classes from the STL, such as \verb|<cmath>| and \verb|<vector>|.
 \newline
 \newline
 Windows GDI will be used for basic graphical output, which is limited to drawing lines and polygons. 
@@ -237,7 +238,9 @@ While this approach may seem more convoluted than simply defining a matrix class
 \newline
 \newline
 Next, by defining matrix multiplication, it is possible to chain transformations and apply transformations to vectors. Here, the \verb|multiply()| function is overloaded so that multiplication between two matrices and multiplication between a matrix and a vector is separate. While this could be combined into a single function, it would require conversion of position vectors (currently 1-D arrays) into matrices (2-D arrays) each cycle, which is a computationally expensive process.
-
+\newline
+\newline
+The multiplication is defined as follows \cite{matrixmultiply}
 \begin{lstlisting}
 
 /* Multiplies two matrices and returns the resulting matrix */
@@ -762,12 +765,23 @@ could be used to implement vortices for example, allowing for even more advanced
 While there are many areas in which the engine could be further developed, it is still an accurate model of projectile motion, as can be seen from the images above and the program itself. If you would like to see the engine running in real time, the whole project is available to download and run on GitHub. \href{https://github.com/maximwebb/3D-engine}{\color{blue} https://github.com/maximwebb/3D-engine}\color{black}
 
 \newpage
-\begin{thebibliography}{2}
+\begin{thebibliography}{4}
+\bibitem{cplusplus}
+C++ reference.
+\texttt{http://www.cplusplus.com/reference/}
+
+\bibitem{matrixmultiply}
+Harry Smith.
+\textit{Edexcel AS and A level Further Mathematics Core Pure Mathematics Book 1/AS}.
+London: Pearson Education Limited
+
 \bibitem{airres}
-Drag Equation
+Drag Equation.
 \\\texttt{https://www.grc.nasa.gov/WWW/K-12/airplane/drageq.html}
+
 \bibitem{turb}
-Turbulence, J. M. McDonough
+Turbulence, J. M. McDonough.
 \\\texttt{http://www.engr.uky.edu/~acfd/lctr-notes634.pdf}
+
 \end{thebibliography}
 \end{document}
