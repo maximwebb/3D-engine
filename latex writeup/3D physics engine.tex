@@ -167,15 +167,15 @@ Then, the width of the virtual plane, and the ratio of this width to the point's
 \newline
 \newline
 Let p = plane width, let x, z be coordinates of point:
-$$ p = ztan{\theta} $$
-$$ ratio = \frac{x}{ztan{\theta}} $$
-Applying the same logic, the vertical ratio is $ \frac{y}{ztan{\theta}} $
+$$ p = z\tan{\theta} $$
+$$ ratio = \frac{x}{z\tan{\theta}} $$
+Applying the same logic, the vertical ratio is $ \frac{y}{z\tan{\theta}} $
 \newline
 \newline
 Then, if the screen has width w and height h, the coordinates on the window $(s_x, s_y) $ are as follows:
 
-$$ s_x = \frac{1}{2}w + \frac{xw}{ztan{\theta}} $$
-$$ s_y = \frac{1}{2}h + \frac{yh}{ztan{\theta}} $$
+$$ s_x = \frac{1}{2}w + \frac{xw}{z\tan{\theta}} $$
+$$ s_y = \frac{1}{2}h + \frac{yh}{z\tan{\theta}} $$
 \newpage
 It is worth noting at this point that this method only works if the viewer is centred about (0, 0, 0). Therefore, in the Point class definition, there should be a second position coordinate, relative to the viewer. With this new type of coordinate, \verb|update()| can now be defined as shown:
 
@@ -271,7 +271,7 @@ vector<int> multiply(matrix transform_mat, vector<int> pt) {
 \end{lstlisting}
 \newpage
 
-You may have noticed that all of the vectors and matrices defined thus far have been four dimensional, whereas the universe has only three spatial dimensions. The reasoning behind this is that whilst 3 x 3 matrices can be used to represent linear transformations, they cannot represent a translation, without defining an addition function.
+You may have noticed that all of the vectors and matrices defined thus far have been four dimensional, whereas the universe has only three spatial dimensions. The reasoning behind this is that whilst 3 x 3 matrices can be used to represent linear transformations, they cannot represent a translation with multiplication.
 \newline
 \newline
 Instead, by using four rows and columns, the (x, y, z) offset can be represented in the fourth column of the matrix as shown:
@@ -279,18 +279,27 @@ Instead, by using four rows and columns, the (x, y, z) offset can be represented
 $$
 M = 
 \begin{pmatrix}
-	1 & 0 & 0 & x \\
-	0 & 1 & 0 & y \\
-	0 & 0 & 1 & z \\
+	a_0 & a_1 & a_2 & x \\
+	b_0 & b_1 & b_2 & y \\
+	c_0 & c_1 & c_2 & z \\
 	0 & 0 & 0 & 1
 	
 \end {pmatrix}
 $$
 
-By storing the (x, y, z) offset as such, translations are kept separate of rotations, simplifying the process greatly. Translations are now defined by adding the player velocity vector to these entries in the matrix.
+By structuring the matrix this way, a vector $ \begin{pmatrix} d \\ e \\ f \end{pmatrix} $ will be remapped as shown. Note that the x, y and z remain independent of other elements:
+$$
+M: \begin{pmatrix} d \\ e \\ f \\ 1 \end{pmatrix} \mapsto 
+\begin{pmatrix}
+	a_0 d + a_1 e + a_2 f + x \\
+	b_0 d + b_1 e + b_2 f + y \\
+	c_0 d + b_1 e + c_2 f + z \\
+	1
+\end{pmatrix}
+$$
 \newline
 \newline
-The rotation matrices can now be defined. For rotations about the y-axis:
+Now, the rotation matrices can now be defined. For rotations about the y-axis:
 
 $$ R_y = 
 	\begin{pmatrix}
@@ -309,7 +318,7 @@ $$ R_x =
 		0 & 0 & 0 & 1
 	\end{pmatrix}
 $$
-And for the sake of completeness, rotations about the z-axis (this one will not be used, as it does not result in a particularly useful transformation).
+And for completeness, rotations about the z-axis (this one will not be used, as it produces head-tilting transformations, which are not particularly useful).
 $$
 R_z = 
 	\begin{pmatrix}
@@ -331,13 +340,13 @@ public:
 	vector<int> coords = { 0, 0, 0 };
 	vector<int> vel = { 0, 0, 0 };
 
-
+	/* Field of View, the angle applies both horizontally and vertically. */
 	float fov = 120;	
 	
 	matrix pos = Mat({ {1, 0, 0, 0,
-					0, 1, 0, 0,
-					0, 0, 1, 0,
-					0, 0, 0, 1} });
+						  0, 1, 0, 0,
+						  0, 0, 1, 0,
+						  0, 0, 0, 1} });
 
 };
 \end{lstlisting}
@@ -532,7 +541,7 @@ void update() {
 		abs_pos[0] += *xVel;
 		abs_pos[2] += *zVel;
 
-		if (on_floor) {
+		if (!*on_floor) {
 			abs_pos[1] += *yVel;
 		}
 	}
@@ -567,7 +576,7 @@ void update() {
 	//Above code hidden
 
 	/* Assigns value of on_floor, which can be read by parent obloid. */
-	if (on_floor && abs_pos[1] > FLOOR_Y) {
+	if (abs_pos[1] > FLOOR_Y) {
 		*on_floor = true;
 	}
 }
@@ -723,22 +732,23 @@ With the development of the engine complete for the purposes of this project, th
 \newline
 Rebounds with each frame shown:
 \newline
-\includegraphics[width=1\textwidth]{projectile_motion_2.png}
+%\includegraphics[width=1\textwidth]{projectile_motion_2.png}
 \newline
 \newline
 \newline
 Rebounds with only the trace and the final position shown:
 \newline
-\includegraphics[width=1\textwidth]{projectile_motion_4.png}
+%\includegraphics[width=1\textwidth]{projectile_motion_4.png}
 \newline
 As you can see in both of these images, the bounces become successively lower, with subsequent collisions with the ground, demonstrating that the impact mechanics are functioning correctly.
+\newline
 \newline
 Furthermore, as shown by the trace in the second image, the bounces are not symmetrical, indicating the effect of air resistance. Note that the effect of air resistance has been exaggerated for visibility, and realistically would have a much lesser effect.
 \newpage
 Rebounds followed by slide:
 \newline
 \newline
-\includegraphics[width=1\textwidth]{projectile_motion_5.png}
+%\includegraphics[width=1\textwidth]{projectile_motion_5.png}
 \newline
 As can be seen in this image, there is a lower coefficient of restitution, resulting in fewer bounces, and a longer contact with the ground at the end. While difficult to demonstrate with a static image, the cube decelerates until stopping, once it is continuously in contact with the floor. This indicates that friction is working as intended.
 \newline
@@ -749,7 +759,7 @@ It is worth considering some limitations of the model. There is currently no imp
 could be used to implement vortices for example, allowing for even more advanced projectile motion.
 \newline
 \newline
-While there are many areas in which the engine could be further developed, the images above, as well as the program running in real-time give an accurate model of projectile motion. If you would like to see the engine running in real time, the whole project is available to download and run on \href{https://github.com/maximwebb/3D-engine}{\color{blue} on Github}\color{black}.
+While there are many areas in which the engine could be further developed, it is still an accurate model of projectile motion, as can be seen from the images above and the program itself. If you would like to see the engine running in real time, the whole project is available to download and run on GitHub. \href{https://github.com/maximwebb/3D-engine}{\color{blue} https://github.com/maximwebb/3D-engine}\color{black}
 
 \newpage
 \begin{thebibliography}{2}
